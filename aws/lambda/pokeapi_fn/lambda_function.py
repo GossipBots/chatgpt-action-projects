@@ -6,9 +6,9 @@ def lambda_handler(event, context):
 
     if 'queryStringParameters' not in event or 'name' not in event['queryStringParameters']:
         return {
-        'statusCode': 400,
-        'body': f'Invalid input: {event}'
-    }
+            'statusCode': 400,
+            'body': f'Invalid input: {event}'
+        }
 
     name = event['queryStringParameters']['name']
     response = http.request('GET', 

@@ -1,46 +1,46 @@
 # ChatGPT action projects
 
-This repository will provide detailed guides for building a variety of ChatGPT actions built on Cloud Services.
+ChatGPT actions empower Language Models (LLMs) to automatically invoke APIs, utilizing API descriptions, in order to respond to user inquiries or fulfill user tasks.
 
-ChatGPT actions let LLMs call APIs automatically based on API description to answer user queries or complete tasks from users.
+This repository ([github.com/GossipBots/chatgpt-action-projects](https://github.com/GossipBots/chatgpt-action-projects)) offers comprehensive guides for creating various ChatGPT actions using Cloud Services. Give us a star if you like it!
 
-## Example 1: Connect ChatGPT action with Pokemon APIs on AWS
+## Project 1: Connect ChatGPT action with Pokemon APIs on AWS
 
 <img src="./pic/pikachu.png" width="100" />
 
 ### Overview
 
-This tutorial goes through step by step how to integrate [ChatGPT actions](https://platform.openai.com/docs/actions/introduction) with APIs deployed on AWS. We will make ChatGPT gain knowledge about [Pokemon](https://www.pokemon.com/us), using information from a public API [pokeapi.co](https://pokeapi.co).
+This tutorial provides a detailed, step-by-step guide on integrating [ChatGPT actions](https://platform.openai.com/docs/actions/introduction) with APIs hosted on AWS. In this tutorial, we will demonstrate how to enhance ChatGPT's knowledge about [Pokemon](https://www.pokemon.com/us) by utilizing data from the public API [pokeapi.co](https://pokeapi.co).
 
 The **ChatGPT prompt** this example will use is:
-```text
-Create an action where users can request information about a specific Pokémon. When a user inputs the name of a Pokémon, your action should utilize the designated API to retrieve details about that Pokémon. Currently, the API response includes only the abilities of the Pokémon. Ensure that your action captures this information accurately and presents it back to the user. Keep in mind that the information provided to users is limited to what is available from the API's response.
-```
+
+*Create an action where users can request information about a specific Pokémon. When a user inputs the name of a Pokémon, your action should utilize the designated API to retrieve details about that Pokémon. Currently, the API response includes only the abilities of the Pokémon. Ensure that your action captures this information accurately and presents it back to the user. Keep in mind that the information provided to users is limited to what is available from the API's response.*
+
+How it works:
+
+1. User submits a query.
+2. The Language Model (LLM) invokes our Cloud Pokemon API hosted on AWS.
+3. The AWS API Gateway receives the call and forwards it to a Lambda function for processing.
+4. The Lambda function then retrieves data from [pokeapi.co](https://pokeapi.co).
+5. The LLM receives the information from the API response and incorporates this knowledge into generating an answer.
 
 <img src="./pic/pokeapi_example.png" width="400" />
 
-The flow is:
-1. User submit a query
-2. LLM invokes the Cloud Pokemon API that we will create on AWS
-3. AWS API gateway receives the call, and forward it to Lambda function to process
-4. The Lambda function calls [pokeapi.co](https://pokeapi.co)
-5. LLM receives the information in API response, and use this knowledge in answer generation
-
-We will be able to provide rich information about Pokemons by querying pokeapi.co. For demo purpose, we limit the scope to:
-- Input of the API is the Pokemon, for example, `pikachu` or `ditto`.
-- The API response only returns the `abilities` attribute. Therefore the LLM will only provide Pokemon's abilities in its answer.
+Through this process, we can offer comprehensive information about Pokémon by querying [pokeapi.co](https://pokeapi.co). For demonstration purposes, we are limiting the scope to:
+- Using the Pokémon's name as input for the API, for example, 'Pikachu' or 'Ditto'.
+- The API response only includes the `abilities` attribute. Therefore, the LLM will provide information about the Pokémon's abilities in its responses.
 
 ### Prerequisite
 
-- You need to have [ChatGPT plus](https://openai.com/blog/chatgpt-plus) subscription to be able to use ChatGPT actions.
-- You need to have an AWS account.
-- This guide uses [AWS CLI](https://aws.amazon.com/cli/). Follow [the AWS doc](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) to install and setup the CLI.
+- To utilize ChatGPT actions, you must have an active [ChatGPT plus](https://openai.com/blog/chatgpt-plus) subscription.
+- You will need an AWS account.
+- This guide relies on the [AWS CLI](https://aws.amazon.com/cli/). Please refer to the [official AWS documentation ](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) for installation and setup instructions for the AWS CLI.
 
 ### AWS Lambda function
 
-This example uses [Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html) as the backend of the API service. The folder [aws/lambda/pokeapi_fn](./aws/lambda/pokeapi_fn/) contains the source files to create and deploy the function.
+In this example, [Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html) serve as the backend for the API service. You can find the source files to create and deploy the function in the [aws/lambda/pokeapi_fn](./aws/lambda/pokeapi_fn/) folder.
 
-The prerequiste is a [Lambda execution role](https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html), skip this step if you already have one:
+A prerequisite for this setup is a [Lambda execution role](https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html). If you already have one in place, you can skip this step:
 
 ```bash
 aws iam create-role \
@@ -48,9 +48,9 @@ aws iam create-role \
     --assume-role-policy-document '{"Version": "2012-10-17","Statement": [{ "Effect": "Allow", "Principal": {"Service": "lambda.amazonaws.com"}, "Action": "sts:AssumeRole"}]}'
 ```
 
-The output contains the role ARN, for example, "arn:aws:iam::<account-id>:role/lambda-ex". We use a place holder var `ROLE_ARN` to represent it.
+The output includes the role ARN, such as "arn:aws:iam::account-id:role/lambda-ex". We will use a placeholder variable `ROLE_ARN` to represent it.
 
-Go to the folder of Python files, [create a Zip file](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html), and [create the Lambda function](https://docs.aws.amazon.com/cli/latest/reference/lambda/create-function.html):
+To proceed, navigate to the folder containing the Python files, [create a Zip file](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html), and then [create the Lambda function](https://docs.aws.amazon.com/cli/latest/reference/lambda/create-function.html):
 
 ```bash
 cd aws/lambda/pokeapi_fn
@@ -64,7 +64,7 @@ aws lambda create-function \
     --role "${ROLE_ARN}"
 ```
 
-Invoke the function to verify it works. Its input `queryStringParameters` will be populated by the AWS API gateway.
+Invoke the function to confirm its functionality. The input `queryStringParameters` will be automatically populated by the AWS API Gateway in the next step.
 
 ```bash
 aws lambda invoke \
@@ -81,11 +81,11 @@ cat response.json
 
 ### AWS API gateway
 
-We use [API Gateway](https://aws.amazon.com/api-gateway/) to expose the Lambda function to the public with administration control (API key). We will give the API key to ChatGPT when invoking our API.
+We utilize [API Gateway](https://aws.amazon.com/api-gateway/) to make the Lambda function accessible to the public while maintaining administration control through an API key. This API key will be provided to ChatGPT when invoking our API.
 
-# Create API and resources
+#### Create API and resources
 
-Follow the [AWS guide](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-lambda.html) to create the Pokemon API:
+Follow the steps outlined in the [AWS guide](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-lambda.html) to create the Pokémon API, API resources, and link it to the Lambda function:
 
 ```bash
 # Create a REST API
@@ -109,7 +109,7 @@ aws apigateway create-resource \
 # Paste response['id'] here:
 export RESOURCE_ID='a11ncw'
 
-# Create a method so API gateway will call lambda
+# Create a method that calls lambda function
 aws apigateway put-method \
     --rest-api-id ${API_ID} \
     --resource-id ${RESOURCE_ID} \
@@ -140,11 +140,11 @@ aws apigateway create-deployment \
     --stage-name 'test'
 ```
 
-## API key and usage plan
+#### API key and usage plan
 
-We want to restrict the access to our API. This can be achieved by creating an [API key](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-setup-api-key-with-console.html). AWS requires the API key to link to a [usage plan](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html). And the usage plan needs to be linked with the `test` deployment we just created.
+We aim to restrict access to our API, which can be accomplished by creating an [API key](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-setup-api-key-with-console.html). AWS mandates that the API key must be associated with a [usage plan](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html), and this usage plan should be linked to the `test` deployment we've just created.
 
-Following the steps to setup all of them:
+Let's follow the steps to set up these components:
 
 ```bash
 # Create an API key
@@ -181,32 +181,34 @@ aws apigateway create-deployment \
     --stage-name 'test'
 ```
 
-### Validate API
+#### Validate API
 
-After the steps being completed, we are able to test the Pokemon API from our local machine:
+Once these steps are completed, we will be able to test the Pokémon API from our local machine:
 
 ```bash
 curl -X GET \
     -H "x-api-key: ${API_KEY}" \
     -H "Content-Type: application/json" \
-    "https://${API_ID}.execute-api.us-east-1.amazonaws.com/test/pokemons"
+    "https://${API_ID}.execute-api.us-east-1.amazonaws.com/test/pokemons?name=ditto"
+
+# {"pokemon": {"name": "ditto", "abilities": ["limber", "imposter"]}}
 ```
 
 ### Create ChatGPT
 
-Create a new GPT and fill in the prompt in [the overview](#overview):
+At last, it's time to create a new GPT instance. Provide the prompt within the [overview section](#overview):
 
 <img src="./pic/chatgpt_prompt.png" width="400" />
 
-Now let's configure **ChatGPT actions**.
+Now, in the most crucial step in this document, let's proceed to configure the **ChatGPT actions**.
 
 #### Authentication
-- Use `API key`, fill your API key above (`${API_KEY}`).
-- Select `Custom` for `Auth type`. Fill `Custom Header Name` with `x-api-key` (AWS uses it for API keys).
+- Choose `API key` as the Authentication method and insert your API key mentioned earlier (`${API_KEY}`).
+- Choose `Custom` for the `Auth type`. Specify `Custom Header Name` as `x-api-key` (AWS uses this for API keys).
 
 #### API schema
 
-ChatGPT how the capabilities of APIs and how to invoke them from API schema defined in the [OpenAPI](https://www.openapis.org/) format. Fill in the schema below that described our Pokemon API (don't forget to replace `url` with your API Gateway URL):
+ChatGPT is equipped to understand the capabilities of APIs and how to invoke them based on API schemas defined in the [OpenAPI](https://www.openapis.org/) format. The follow schema describes the API we've just implemented. Copy it into the GPT configuration, ensuring to replace `url` with your API Gateway URL.
 
 ```yaml
 openapi: 3.1.0
@@ -232,4 +234,6 @@ paths:
 
 #### Publish GPT and chat about Pokemon!
 
+After clicking `publish`, you can now have enjoyable conversations with GPT about Pokémon!
 
+<img src="./pic/pokemon_gpt.png" width="500" />
